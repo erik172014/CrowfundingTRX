@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/erik172014/Earn-Tron"
   },
-  "homepage": "https://erik172014.github.io/Earn-Tron",
+  "homepage": "https://earntron.ml",
   "dependencies": {
     "@babel/core": "7.8.4",
     "@svgr/webpack": "4.3.3",
