@@ -91,7 +91,15 @@ export default class EarnTron extends Component {
 
       window.alert("Debes dejar 40 TRX libres en tu cuenta para hacer la transacción");
 
-      document.getElementById("amount").value = amount-40;
+      if ( amount > balanceInTRX) {
+        document.getElementById("amount").value = balanceInTRX-40;
+
+      }else{
+        document.getElementById("amount").value = amount-40;
+        
+      }
+
+      
 
     }
     
