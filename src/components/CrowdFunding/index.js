@@ -19,9 +19,14 @@ export default class EarnTron extends Component {
 
     const balanceInSun = await window.tronWeb.trx.getBalance(); //number
     var balanceInTRX = window.tronWeb.fromSun(balanceInSun); //string
-    balanceInTRX = parseInt(balanceInTRX);//number
+    balanceInTRX = parseFloat(balanceInTRX);//number
 
-    let amount = document.getElementById("amount").value;
+    var amount = document.getElementById("amount").value;
+
+    amount = parseFloat(amount);
+
+    console.log(balanceInTRX);
+    console.log(amount+40);
 
     if ( balanceInTRX >= amount+40 ){
 
@@ -77,6 +82,7 @@ export default class EarnTron extends Component {
 
       }else{
         window.alert("El minimo de inversión es 200 TRX");
+        document.getElementById("amount").value = 200;
       }
     
       
@@ -84,6 +90,8 @@ export default class EarnTron extends Component {
     }else{
 
       window.alert("Debes dejar 40 TRX libres en tu cuenta para hacer la transacción");
+
+      document.getElementById("amount").value = amount-40;
 
     }
     
@@ -103,7 +111,7 @@ export default class EarnTron extends Component {
           </h6>
             <form>
               <div className="form-group">
-                <input type="text" className="form-control" id="amount" placeholder="Min. 200 TRX"></input>
+                <input type="number" className="form-control" id="amount" placeholder="Min. 200 TRX"></input>
                 <p className="card-text">Debes tener ~40 TRX para hacer la transacción</p>
               </div>
             </form>
