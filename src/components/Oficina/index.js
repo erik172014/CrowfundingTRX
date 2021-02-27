@@ -77,7 +77,21 @@ export default class EarnTron extends Component {
   };
 
   async withdraw(){
-    await Utils.contract.withdraw().send()
+
+    const { balanceRef, my} = this.state;
+
+    var saldo = balanceRef+my;
+
+    if (saldo >= 200) {
+
+      await Utils.contract.withdraw().send();
+
+    }else{
+      window.alert("The minimum withdrawal is 200 TRX");
+
+    }
+
+    
   };
 
 

@@ -17,43 +17,75 @@ export default class EarnTron extends Component {
 
   async deposit() {
 
-    var loc = document.location.href;
-    if(loc.indexOf('?')>0){
-        var getString = loc.split('?')[1];
-        var GET = getString.split('&');
-        var get = {};
-        for(var i = 0, l = GET.length; i < l; i++){
-            var tmp = GET[i].split('=');
-            get[tmp[0]] = unescape(decodeURI(tmp[1]));
-        }
-        if (get['capital']) {
-          document.getElementById('tarifa').value = 1;
-          document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';
-        }else{
-          if (get['ref'].length === 34) {
-            document.getElementById('tarifa').value = 0;
-            document.getElementById('sponsor').value = get['ref'];            
-          }else{
-            document.getElementById('tarifa').value = 0;
-             document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';
-          }
-        }
-        
-    }else{
-        document.getElementById('tarifa').value = 0;
-        document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF'; 
-    }
+    const balanceInSun = await window.tronWeb.trx.getBalance(); //number
+    var balanceInTRX = window.tronWeb.fromSun(balanceInSun); //string
+    balanceInTRX = parseInt(balanceInTRX);//number
 
     let amount = document.getElementById("amount").value;
-    let sponsor = document.getElementById("sponsor").value;
-    let tarifa = document.getElementById("tarifa").value;
 
-    document.getElementById("amount").value = "";
-  
-    return Utils.contract.deposit(tarifa, sponsor).send({
-      shouldPollResponse: true,
-      callValue: amount * 1000000 // converted to SUN
-    });
+    if ( balanceInTRX >= amount+40 ){
+
+      var loc = document.location.href;
+      if(loc.indexOf('?')>0){
+          var getString = loc.split('?')[1];
+          var GET = getString.split('&');
+          var get = {};
+          for(var i = 0, l = GET.length; i < l; i++){
+              var tmp = GET[i].split('=');
+              get[tmp[0]] = unescape(decodeURI(tmp[1]));
+          }
+          var inversors = await Utils.contract.investors(get['ref']).call();
+
+          //console.log(inversors);
+
+          if ( inversors.registered ) {
+            document.getElementById('sponsor').value = get['ref']; 
+          }else{
+            document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';         
+          }
+          
+          
+      }else{
+
+          document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF'; 
+      }
+
+      let tarifa = 0;
+
+      var sponsor = document.getElementById("sponsor").value;
+
+      const account =  await window.tronWeb.trx.getAccount();
+      var accountAddress = account.address;
+      accountAddress = window.tronWeb.address.fromHex(accountAddress);
+
+      var investors = await Utils.contract.investors(accountAddress).call();
+
+      if (investors.registered) {
+        
+        sponsor = investors.sponsor;
+        
+      }
+
+      document.getElementById("amount").value = "";
+
+      if ( amount >= 200){
+
+        return Utils.contract.deposit(tarifa, sponsor).send({
+          shouldPollResponse: true,
+          callValue: amount * 1000000 // converted to SUN
+        });
+
+      }else{
+        window.alert("El minimo de inversión es 200 TRX");
+      }
+    
+      
+
+    }else{
+
+      window.alert("Debes dejar 40 TRX libres en tu cuenta para hacer la transacción");
+
+    }
     
   };
 
@@ -72,7 +104,7 @@ export default class EarnTron extends Component {
             <form>
               <div className="form-group">
                 <input type="text" className="form-control" id="amount" placeholder="Min. 200 TRX"></input>
-                <p className="card-text">Debes tener ~3 TRX para hacer la transacción</p>
+                <p className="card-text">Debes tener ~40 TRX para hacer la transacción</p>
               </div>
             </form>
           <button type="button" class="btn btn-light" onClick={() => this.deposit()}>Invertir</button>
