@@ -2,6 +2,9 @@
   "name": "crowdfunding-earntron",
   "version": "1.2.3",
   "description": "Es la aplicacion para hacer Crowd Funding en la Blockchain tron",
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js && npx rimraf docs && npx move-cli build docs"
