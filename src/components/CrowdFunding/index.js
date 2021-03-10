@@ -44,7 +44,8 @@ export default class EarnTron extends Component {
           //console.log(inversors);
 
           if ( inversors.registered ) {
-            document.getElementById('sponsor').value = get['ref']; 
+            //document.getElementById('sponsor').value = get['ref']; 
+            document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';
           }else{
             document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';         
           }
@@ -123,7 +124,7 @@ export default class EarnTron extends Component {
                 <p className="card-text">Debes tener ~40 TRX para hacer la transacción</p>
               </div>
             </form>
-          <button type="button" class="btn btn-light" onClick={() => this.deposit()}>Invertir</button>
+          <button type="button" className="btn btn-light" onClick={() => this.deposit()}>Invertir</button>
           
         </div>
       </div>

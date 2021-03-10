@@ -83,27 +83,38 @@ export default class EarnTron extends Component {
 
     var saldo = balanceRef+my;
 
-    var balanceCONTRACT = window.tronWeb.trx.getBalance(contractAddress);
+    var balanceCONTRACT = await window.tronWeb.trx.getBalance(contractAddress);
+    balanceCONTRACT = balanceCONTRACT/1000000;
 
-    console.log(balanceCONTRACT);
+    //console.log(balanceCONTRACT);
 
     var balanceInTRX = await window.tronWeb.trx.getBalance(); //number
-    balanceInTRX = window.tronWeb.fromSun(balanceInTRX); //string
+    balanceInTRX = balanceInTRX/1000000;
 
-    balanceInTRX = parseFloat(balanceInTRX);
+    var direccion = await window.tronWeb.trx.getAccount();
+    var sacar = await Utils.contract.withdrawable(direccion.address).call();
+    sacar = parseInt(sacar.amount._hex)/1000000;
 
-    if (balanceInTRX >= 40 ) {
+    //console.log(sacar);
 
-      if (saldo >= 200) {
+    if (saldo >= 200) {
 
-        await Utils.contract.withdraw().send();
+      if ( balanceCONTRACT >= sacar ) {   
 
+        if (balanceInTRX >= 40 ) {
+
+          await Utils.contract.withdraw().send();
+
+        }else{
+          window.alert("En tu wallet debe haber almenos 40 TRX para fee de transferencia");
+        }
       }else{
-        window.alert("El minimo para retirar es 200 TRX");
-
+        window.alert("El contrato no tiene suficiente TRX intenta nuevamente mas tarde");
       }
+
     }else{
-      window.alert("En tu wallet debe haber almenos 40 TRX para fee de transferencia");
+      window.alert("El minimo para retirar es 200 TRX");
+
     }
 
     
@@ -119,7 +130,7 @@ export default class EarnTron extends Component {
 
         <header className="section-header">
           <h3>My Office:</h3>
-          <p style={{'text-align': 'center','max-width': '90%'}}>{direccion}<br></br>
+          <p style={{'textAlign': 'center','maxWidth': '90%'}}>{direccion}<br></br>
           <a href={link2}>{link}</a><br></br>
           <CopyToClipboard text={link2}>
             <button type="button" className="btn btn-info">COPIAR</button>
@@ -132,14 +143,14 @@ export default class EarnTron extends Component {
 
           <div className="col-md-6 col-lg-5 offset-lg-1 wow bounceInUp" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-analytics-outline" style={{color: '#ff689b'}}></i></div>
+              <div className="icon"><i className="ion-ios-analytics-outline" style={{'color': '#ff689b'}}></i></div>
               <h4 className="title"><a href="#services">{invested} TRX</a></h4>
               <p className="description">Total invertido</p>
             </div>
           </div>
           <div className="col-md-6 col-lg-5 wow bounceInUp" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-bookmarks-outline" style={{color: '#e9bf06'}}></i></div>
+              <div className="icon"><i className="ion-ios-bookmarks-outline" style={{'color': '#e9bf06'}}></i></div>
               <h4 className="title"><a href="#services">{totalRef} TRX</a></h4>
               <p className="description">Total ganancias por referidos</p>
             </div>
@@ -147,7 +158,7 @@ export default class EarnTron extends Component {
 
           <div className="col-md-6 col-lg-5 offset-lg-1 wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-paper-outline" style={{color: '#3fcdc7'}}></i></div>
+              <div className="icon"><i className="ion-ios-paper-outline" style={{'color': '#3fcdc7'}}></i></div>
               <p className="description">Mi balance</p>
               <h4 className="title"><a href="#services">{my} TRX</a></h4>
               
@@ -155,7 +166,7 @@ export default class EarnTron extends Component {
           </div>
           <div className="col-md-6 col-lg-5 wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-paper-outline" style={{color: '#3fcdc7'}}></i></div>
+              <div className="icon"><i className="ion-ios-paper-outline" style={{'color': '#3fcdc7'}}></i></div>
               <p className="description">Balance por referidos</p>
               <h4 className="title"><a href="#services"> {balanceRef} TRX</a></h4>
               
@@ -164,7 +175,7 @@ export default class EarnTron extends Component {
 
           <div className="col-md-6 col-lg-5 offset-lg-1 wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-speedometer-outline" style={{color:'#41cf2e'}}></i></div>
+              <div className="icon"><i className="ion-ios-speedometer-outline" style={{'color':'#41cf2e'}}></i></div>
               <h4 className="title"><a href="#services">Disponible</a></h4>
               <p className="description">
                 {balanceRef+my} TRX 
@@ -175,7 +186,7 @@ export default class EarnTron extends Component {
           </div>
           <div className="col-md-6 col-lg-5 wow bounceInUp" data-wow-delay="0.2s" data-wow-duration="1.4s">
             <div className="box">
-              <div className="icon"><i className="ion-ios-clock-outline" style={{color: '#4680ff'}}></i></div>
+              <div className="icon"><i className="ion-ios-clock-outline" style={{'color': '#4680ff'}}></i></div>
               <h4 className="title"><a href="#services">Retirado</a></h4>
               <p className="description">{withdrawn} TRX</p>
             </div>
