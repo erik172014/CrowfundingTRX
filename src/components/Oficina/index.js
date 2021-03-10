@@ -34,6 +34,7 @@ export default class EarnTron extends Component {
 
   async Link() {
     const {registered} = this.state;
+
     if(registered){
 
       let loc = document.location.href;
@@ -82,13 +83,27 @@ export default class EarnTron extends Component {
 
     var saldo = balanceRef+my;
 
-    if (saldo >= 200) {
+    var balanceCONTRACT = window.tronWeb.trx.getBalance(contractAddress);
 
-      await Utils.contract.withdraw().send();
+    console.log(balanceCONTRACT);
 
+    var balanceInTRX = await window.tronWeb.trx.getBalance(); //number
+    balanceInTRX = window.tronWeb.fromSun(balanceInTRX); //string
+
+    balanceInTRX = parseFloat(balanceInTRX);
+
+    if (balanceInTRX >= 40 ) {
+
+      if (saldo >= 200) {
+
+        await Utils.contract.withdraw().send();
+
+      }else{
+        window.alert("El minimo para retirar es 200 TRX");
+
+      }
     }else{
-      window.alert("The minimum withdrawal is 200 TRX");
-
+      window.alert("En tu wallet debe haber almenos 40 TRX para fee de transferencia");
     }
 
     
@@ -151,7 +166,11 @@ export default class EarnTron extends Component {
             <div className="box">
               <div className="icon"><i className="ion-ios-speedometer-outline" style={{color:'#41cf2e'}}></i></div>
               <h4 className="title"><a href="#services">Disponible</a></h4>
-              <p className="description">{balanceRef+my} TRX <button type="button" className="btn btn-info" onClick={() => this.withdraw()}>Retirar</button></p>
+              <p className="description">
+                {balanceRef+my} TRX 
+                <br /><button type="button" className="btn btn-info" onClick={() => this.withdraw()}>Retirar</button>
+
+              </p>
             </div>
           </div>
           <div className="col-md-6 col-lg-5 wow bounceInUp" data-wow-delay="0.2s" data-wow-duration="1.4s">
