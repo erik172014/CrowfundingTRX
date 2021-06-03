@@ -1,5 +1,5 @@
-
+import cons from "../../cons.js";
 /// La direccion de su contrato acá ///////////////////////////////////
-const contractAddress = "TV1R4Vqw3eiabXfaYB42YAeadXYSzXwcwt";
+const contractAddress = cons.SC;
 
 export default contractAddress;

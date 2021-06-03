@@ -1,135 +1,205 @@
 import React, { Component } from "react";
 import Utils from "../../utils";
-import "./CrowdFunding.scss";
 import contractAddress from "../Contract";
+
+import cons from "../../cons.js";
 
 export default class EarnTron extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+
+      min: 10
+
+    };
+
     this.deposit = this.deposit.bind(this);
+    this.estado = this.estado.bind(this);
   }
 
   async componentDidMount() {
     await Utils.setContract(window.tronWeb, contractAddress);
+    this.estado();
+    setInterval(() => this.estado(),3*1000);
   };
+
+  async estado(){
+
+    var accountAddress =  await window.tronWeb.trx.getAccount();
+    accountAddress = window.tronWeb.address.fromHex(accountAddress.address);
+
+    var inicio = accountAddress.substr(0,4);
+    var fin = accountAddress.substr(-4);
+
+    var texto = inicio+"..."+fin;
+
+    document.getElementById("login").innerHTML = '<a href="https://tronscan.io/#/address/'+accountAddress+'" class="logibtn gradient-btn">'+texto+'</a>';
+document.getElementById("contrato").innerHTML = '<a class="scroll" target="_black" rel="noopener noreferrer" href="https://tronscan.io/#/contract/'+contractAddress+'/code">Contrato</a>';
+
+    var min = 10;
+
+    var tronUSDT = await window.tronWeb;
+    var contractUSDT = await tronUSDT.contract().at(cons.USDT);
+
+    var aprovado = await contractUSDT.allowance(accountAddress,contractAddress).call();
+    aprovado = parseInt(aprovado.remaining._hex);
+
+    if (aprovado > 0) {
+      aprovado = "Depositar"
+    }else{
+      aprovado = "Aprobar"
+    }
+
+
+    this.setState({
+      min: min,
+      deposito: aprovado
+    });
+
+  }
 
 
   async deposit() {
 
-    const balanceInSun = await window.tronWeb.trx.getBalance(); //number
-    var balanceInTRX = window.tronWeb.fromSun(balanceInSun); //string
-    balanceInTRX = parseFloat(balanceInTRX);//number
+
+    const { min } = this.state;
 
     var amount = document.getElementById("amount").value;
-
     amount = parseFloat(amount);
+    amount = parseInt(amount*1000000);
 
-    console.log(balanceInTRX);
-    console.log(amount+40);
+    var accountAddress =  await window.tronWeb.trx.getAccount();
+    accountAddress = window.tronWeb.address.fromHex(accountAddress.address);
 
-    if ( balanceInTRX >= amount+40 ){
+    var tronUSDT = await window.tronWeb;
+    var contractUSDT = await tronUSDT.contract().at(cons.USDT);
 
-      var loc = document.location.href;
-      if(loc.indexOf('?')>0){
-          var getString = loc.split('?')[1];
-          var GET = getString.split('&');
-          var get = {};
-          for(var i = 0, l = GET.length; i < l; i++){
-              var tmp = GET[i].split('=');
-              get[tmp[0]] = unescape(decodeURI(tmp[1]));
-          }
-          var inversors = await Utils.contract.investors(get['ref']).call();
+    var aprovado = await contractUSDT.allowance(accountAddress,contractAddress).call();
+    aprovado = parseInt(aprovado.remaining._hex);
 
-          //console.log(inversors);
+    if ( aprovado >= amount ){
 
-          if ( inversors.registered ) {
-            //document.getElementById('sponsor').value = get['ref']; 
-            document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';
-          }else{
-            document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF';         
-          }
-          
-          
-      }else{
+        var loc = document.location.href;
+        if(loc.indexOf('?')>0){
+            var getString = loc.split('?')[1];
+            var GET = getString.split('&');
+            var get = {};
+            for(var i = 0, l = GET.length; i < l; i++){
+                var tmp = GET[i].split('=');
+                get[tmp[0]] = unescape(decodeURI(tmp[1]));
+            }
 
-          document.getElementById('sponsor').value = 'TXkyzBxJqjYj18Kg48rLv7ZEmx8ayptPoF'; 
-      }
+            if (get['ref']) {
+              tmp = get['ref'].split('#');
 
-      let tarifa = 0;
+              var inversors = await Utils.contract.investors(tmp[0]).call();
 
-      var sponsor = document.getElementById("sponsor").value;
+              console.log(inversors);
 
-      const account =  await window.tronWeb.trx.getAccount();
-      var accountAddress = account.address;
-      accountAddress = window.tronWeb.address.fromHex(accountAddress);
+              if ( inversors.registered ) {
+                document.getElementById('sponsor').value = tmp[0];
+              }else{
+                document.getElementById('sponsor').value = cons.WS;
+              }
+            }else{
+               document.getElementById('sponsor').value = cons.WS;
+            }
 
-      var investors = await Utils.contract.investors(accountAddress).call();
+        }else{
 
-      if (investors.registered) {
-        
-        sponsor = investors.sponsor;
-        
-      }
+            document.getElementById('sponsor').value = cons.WS;
+        }
 
-      document.getElementById("amount").value = "";
+        var sponsor = document.getElementById("sponsor").value;
 
-      if ( amount >= 200){
+        var investors = await Utils.contract.investors(accountAddress).call();
 
-        return Utils.contract.deposit(tarifa, sponsor).send({
-          shouldPollResponse: true,
-          callValue: amount * 1000000 // converted to SUN
-        });
+        if (investors.registered) {
 
-      }else{
-        window.alert("El minimo de inversión es 200 TRX");
-        document.getElementById("amount").value = 200;
-      }
-    
-      
+          sponsor = investors.sponsor;
+
+        }
+
+
+        if ( amount >= min){
+
+          document.getElementById("amount").value = "";
+
+          await Utils.contract.deposit(amount,sponsor).send();
+
+        }else{
+          window.alert("Please enter an amount greater than 10 USDT");
+          document.getElementById("amount").value = 10;
+        }
+
+
 
     }else{
 
-      window.alert("Debes dejar 40 TRX libres en tu cuenta para hacer la transacción");
+      if (amount > 10 && aprovado > 10) {
 
-      if ( amount > balanceInTRX) {
-        document.getElementById("amount").value = balanceInTRX-40;
-
-      }else{
-        document.getElementById("amount").value = amount-40;
         
+
+        if ( amount > aprovado) {
+          if (aprovado <= 0) {
+            document.getElementById("amount").value = 10;
+            window.alert("You do not have enough funds in your account you place at least 10 USDT");
+          }else{
+            document.getElementById("amount").value = 10;
+            window.alert("You must leave 50 TRX free in your account to make the transaction");
+          }
+
+
+
+        }else{
+
+          document.getElementById("amount").value = amount;
+          window.alert("You must leave 50 TRX free in your account to make the transaction");
+
+        }
+      }else{
+        
+        if (aprovado <= 0) {
+          
+          await contractUSDT.approve(contractAddress, "115792089237316195423570985008687907853269984665640564039457584007913129639935").send();
+        }else{
+          window.alert("You do not have enough funds in your account you place at least 250 TRX");
+        }
       }
-
-      
-
     }
-    
+
+
   };
 
-  render() {
-    
-    return (
-      
-      <div className="card wow bounceInUp">
-          <i className="fa fa-diamond"></i>
-        <div className="card-body">
-          <h5 className="card-title">Gold Premium</h5>
-          <h6 className="card-text">
-            Return: <strong>200%</strong><br></br>
-            <strong>2%</strong> per day<br></br>
-          </h6>
-            <form>
-              <div className="form-group">
-                <input type="number" className="form-control" id="amount" placeholder="Min. 200 TRX"></input>
-                <p className="card-text">Debes tener ~40 TRX para hacer la transacción</p>
-              </div>
-            </form>
-          <button type="button" className="btn btn-light" onClick={() => this.deposit()}>Invertir</button>
-          
-        </div>
-      </div>
-        
 
+  render() {
+
+    var { min } = this.state;
+
+    min = "Min. "+min+" USDT";
+
+
+    return (
+
+
+        <div>
+          <h6 className="text-center">
+            Return: <strong>200%</strong><br />
+          </h6>
+
+          <div className="form-group text-center">
+            <input type="number" className="form-control mb-20 text-center" id="amount" placeholder={min}></input>
+            <p className="card-text">You must have ~ 50 TRX to make the transaction</p>
+
+            <a href="#amount" className="gradient-btn v2" onClick={() => this.deposit()}>{this.state.deposito}</a>
+
+
+
+
+          </div>
+
+        </div>
 
 
     );

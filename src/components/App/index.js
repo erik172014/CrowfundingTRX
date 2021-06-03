@@ -5,9 +5,8 @@ import Utils from "../../utils";
 import CrowdFunding from "../CrowdFunding";
 import Datos from "../Datos";
 import Oficina from "../Oficina";
-import TronLinkInfo from "../TronLinkInfo";
 import TronLinkGuide from "../TronLinkGuide";
-import "./App.scss";
+
 
 const FOUNDATION_ADDRESS = "TWiWt5SEDzaEqS6kE5gandWMNfxR2B5xzg";
 
@@ -42,6 +41,7 @@ class App extends Component {
 
       const timer = setInterval(() => {
         if (tries >= 10) {
+
           const TRONGRID_API = "https://api.trongrid.io";
 
           window.tronWeb = new TronWeb(
@@ -102,41 +102,54 @@ class App extends Component {
   }
 
   render() {
-    if (!this.state.tronWeb.installed) return <TronLinkGuide />;
+    if (!this.state.tronWeb.installed) return (
+      <>
+        <div className="container">
+          <TronLinkGuide />
+        </div>
+      </>
+      );
 
-    if (!this.state.tronWeb.loggedIn) return <TronLinkGuide installed />;
+    if (!this.state.tronWeb.loggedIn) return (
+      <>
+        <div className="container">
+          <TronLinkGuide installed />
+        </div>
+      </>
+      );
 
     return (
-      <div>
-        <div>
-          <section id="why-us" className="wow fadeIn">
-            <div className="container">
-              <header className="section-header">
-                  <h3>Has tu inversión</h3>
-              </header>
-              <div  className="row row-eq-height justify-content-center">
-                <CrowdFunding />
-                <TronLinkInfo />
-              </div>
-              <div >
-                <Datos />
-              </div>
+
+      <>
+
+      <section className="convert-area" id="convert">
+        <div className="container">
+          <div className="convert-wrap">
+            <div className="row justify-content-center align-items-center flex-column pb-30">
+              <h1 className="text-white">Make your investment</h1>
             </div>
-          </section>
-          
-          <section id="services" className="section-bg">
-            <Oficina /> 
-          </section>
+            <div className="row justify-content-center align-items-start">
+
+              <div className="col-lg-12 cols">
+                <CrowdFunding />
+              </div>
+
+            </div>
+          </div>
         </div>
-      </div>
-      
+      </section>
 
+      <Oficina />
 
-      );
+      <div class="space-90"></div>
+
+      <Datos />
+
+      </>
+    );
 
   }
 }
 export default App;
 
 // {tWeb()}
-
